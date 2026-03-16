@@ -5,7 +5,18 @@ ENTRY(get_eflags)
     pushf
     popl %eax
     ret
-
+    
+// 
+ENTRY(writeMSR)
+    push %ebp
+    movl %esp, %ebp
+    movl 8(%ebp), %ecx 
+    movl 12(%ebp), %eax 
+    movl 16(%ebp), %edx 
+    wrmsr
+    popl %ebp
+    ret
+    
 // Set EFLAGS
 // void set_eflags(void)
 ENTRY(set_eflags)

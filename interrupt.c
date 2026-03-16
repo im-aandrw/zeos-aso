@@ -6,12 +6,13 @@
 #include <segment.h>
 #include <hardware.h>
 #include <io.h>
-
+#include <errno.h>
 #include <zeos_interrupt.h>
 
 extern void keyboard_handler(void);
 extern void clock_handler(void);
 extern void pf_handler(void);
+extern unsigned int zeos_ticks;
 
 Gate idt[IDT_ENTRIES];
 Register    idtR;
@@ -94,7 +95,7 @@ void setIdt()
   /* page fault management. */
   setInterruptHandler(14, pf_handler, 0);
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
-
+  
   set_idt_reg(&idtR);
 }
 
@@ -103,6 +104,7 @@ void setIdt()
 void clock_routine()
 {
    zeos_show_clock();
+   zeos_ticks += 1;
 }
 
 void keyboard_routine()
