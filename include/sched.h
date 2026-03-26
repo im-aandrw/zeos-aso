@@ -11,10 +11,18 @@
 
 #define KERNEL_STACK_SIZE	1024
 
-enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
+enum state_t { ST_RUN, ST_READY, ST_BLOCKED }; 
 
-struct task_struct {
+struct task_struct 
+{
   int PID;			/* Process ID. This MUST be the first field of the struct. */
+  // para meter el proceso en queue.
+  // sirve para tener una referencia al anterior y al siguiente elemento.
+  struct list_head list;
+  // guarda el estado de cada proceso.  
+  int state;
+  // dónde retomar su pila de kernel.
+  unsigned long kernel_esp;
   page_table_entry * dir_pages_baseAddr;
 };
 

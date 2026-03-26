@@ -15,5 +15,11 @@ int __attribute__ ((__section__(".text.main")))
      itoa(time, c);
      write(1, c, 10);
      
+    int pid = getpid();
+    if (pid == 0)
+    {
+      write(1, "ok", 3);
+    }
+
   while(1) { }
 }

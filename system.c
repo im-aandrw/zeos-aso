@@ -59,15 +59,16 @@ int __attribute__((__section__(".text.main")))
   init_mm();
 
   /* Initialize an address space to be used for the monoprocess version of ZeOS */
-  prepare_mono_address_space();/* TO BE DELETED WHEN THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS IS ADDED */
+  // prepare_mono_address_space();/* TO BE DELETED WHEN THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS IS ADDED */
 
   /* Initialize Scheduling */
   init_sched();
 
-  /* Initialize idle task  data */
-  init_idle();
   /* Initialize task 1 data */
   init_task1();
+  
+  /* Initialize idle task  data */
+  init_idle();
 
   /* Move user code/data now (after the page table initialization) */
   copy_data((void *) KERNEL_START + *p_sys_size, (void*)L_USER_START, *p_usr_size);
@@ -75,6 +76,7 @@ int __attribute__((__section__(".text.main")))
 
   printk("Entering user mode...\n");
 
+  set_pe_flag();
   enable_int();
   /*
    * We return from a 'theorical' call to a 'call gate' to reduce our privileges

@@ -12,18 +12,18 @@
 # 4 "wrappers.S" 2
 
 .globl write; .type write, @function; .align 0; write:
-     pushl %ebp
-     movl %esp, %ebp
-     pushl %ebx
-     movl 8(%ebp), %edx
-     movl 12(%ebp), %ecx
-     movl 16(%ebp), %ebx
-     movl $4, %eax
-     pushl %edx
+ pushl %ebp
+ movl %esp, %ebp
+ pushl %ebx
+ movl 8(%ebp), %edx
+ movl 12(%ebp), %ecx
+ movl 16(%ebp), %ebx
+ movl $4, %eax
+ pushl %edx
  pushl %ecx
  pushl $return_address
  pushl %ebp
-     sysenter
+    sysenter
 return_address:
  popl %ebp
  subl $4, %esp
@@ -60,6 +60,27 @@ nextime:
     movl %eax, errno
     movl $-1, %eax
 endtime:
+    movl %ebp, %esp
+    pop %ebp
+    ret
+
+.globl getpid; .type getpid, @function; .align 0; getpid:
+    pushl %ebp
+    movl %esp, %ebp
+ movl $20, %eax
+ pushl $nextpid
+ pushl %ebp
+    movl %esp, %ebp
+ sysenter
+nextpid:
+ popl %ebp
+    subl $4, %esp
+    cmpl $0, %eax
+    jge endpid
+    negl %eax
+    movl %eax, errno
+    movl $-1, %eax
+endpid:
     movl %ebp, %esp
     pop %ebp
     ret

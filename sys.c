@@ -60,3 +60,26 @@ int sys_gettime()
 	return zeos_ticks;
 }
 
+int sys_getpid()
+{
+  return current()->PID;
+}
+
+int sys_fork()
+{
+  int IDPF = alloc_frame();
+  if (IDPF == -1)
+  {
+    return -1;
+  }
+  page_table_entry * SPTAddress = get_PT(current());
+  set_ss_pag(SPTAddress, IDPF, IDPF);
+
+  union task_union * child;
+  child->task = (struct task_struct *) (frame << 12);
+  copy_data(current()->stack, child->stack, KERNEL_STACK_SIZE);
+  
+}
+
+
+
