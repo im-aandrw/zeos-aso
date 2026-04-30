@@ -13,7 +13,7 @@
 #include <utils.h>
 #include <errno.h>
 #include <zeos_mm.h> /* TO BE DELETED WHEN ADDED THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS */
-
+extern struct circular_buffer keyboard_buffer; 
 unsigned int zeos_ticks;
 int (*usr_main)(void) = (void *) (PAG_LOG_INIT_CODE*PAGE_SIZE);
 unsigned int *p_sys_size = (unsigned int *) KERNEL_START;
@@ -59,16 +59,16 @@ int __attribute__((__section__(".text.main")))
   init_mm();
 
   /* Initialize an address space to be used for the monoprocess version of ZeOS */
-  // prepare_mono_address_space();/* TO BE DELETED WHEN THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS IS ADDED */
+  //prepare_mono_address_space();/* TO BE DELETED WHEN THE PROCESS MANAGEMENT CODE TO BECOME MULTIPROCESS IS ADDED */
 
   /* Initialize Scheduling */
   init_sched();
-
   /* Initialize task 1 data */
   init_task1();
-  
   /* Initialize idle task  data */
   init_idle();
+  
+  set_pe_flag();
 
   /* Move user code/data now (after the page table initialization) */
   copy_data((void *) KERNEL_START + *p_sys_size, (void*)L_USER_START, *p_usr_size);
@@ -76,7 +76,6 @@ int __attribute__((__section__(".text.main")))
 
   printk("Entering user mode...\n");
 
-  set_pe_flag();
   enable_int();
   /*
    * We return from a 'theorical' call to a 'call gate' to reduce our privileges
@@ -87,5 +86,3 @@ int __attribute__((__section__(".text.main")))
   /* The execution never arrives to this point */
   return 0;
 }
-
-

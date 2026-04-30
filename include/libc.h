@@ -12,6 +12,22 @@ int strlen(char *a);
 
 int write(int fd, char *buffer, int size);
 
-void peeror(void);
+void perror(void);
+
+int gettime(void);
+
+int getpid(void);
+
+int fork(void);
+
+void exit(void);
+
+void block(void);
+
+int unblock(int pid);
+
+int read(char* b, int maxchars);
+
+int getchar(void);
 
 #endif  /* __LIBC_H__ */

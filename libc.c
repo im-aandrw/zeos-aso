@@ -90,10 +90,3 @@ void perror(void)
 	char* msg = error_messages[errno];
 	write(1, msg, strlen(msg));
 }
-
-
-
-
-
-
-

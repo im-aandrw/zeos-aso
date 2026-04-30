@@ -10,98 +10,157 @@ ENTRY(write)
 	movl 12(%ebp), %ecx // buffer = ecx
 	movl 16(%ebp), %ebx // size = ebx
 	movl $4, %eax
-	pushl %edx
-	pushl %ecx
 	pushl $return_address
 	pushl %ebp
-    sysenter
+	movl %esp, %ebp
+	sysenter
 return_address:
 	popl %ebp
-	subl $4, %esp
-	popl %ecx
-	popl %edx
 	cmpl $0, %eax
 	jge end
 	negl %eax
 	movl %eax, errno
 	movl $-1, %eax
 end:
-	popl %ebx
+	movl -4(%ebp), %ebx
+	movl %ebp, %esp
 	popl %ebp
 	ret
 	
 ENTRY(gettime)
-    pushl %ebp
-    movl %esp, %ebp
-    movl $10, %eax
-    pushl %edx
-    pushl %ecx
-    pushl $nextime 
-    pushl %ebp
-    movl %esp, %ebp
-    sysenter
+	pushl %ebp
+	movl %esp, %ebp
+	movl $10, %eax
+	pushl $nextime 
+	pushl %ebp
+	movl %esp, %ebp
+	sysenter
 nextime:
-    popl %ebp
-    subl $4, %esp
-    popl %ecx
-    popl %edx
-    cmpl $0, %eax
-    jge endtime
-    negl %eax
-    movl %eax, errno
-    movl $-1, %eax
+	popl %ebp
+	cmpl $0, %eax
+	jge endtime
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
 endtime:
-    movl %ebp, %esp
-    pop %ebp
-    ret
+	movl %ebp, %esp
+	popl %ebp
+	ret
 
 ENTRY(getpid)
-    pushl %ebp
-    movl %esp, %ebp
+	pushl %ebp
+	movl %esp, %ebp
 	movl $20, %eax
 	pushl $nextpid
 	pushl %ebp
-    movl %esp, %ebp
+	movl %esp, %ebp
 	sysenter
 nextpid:
 	popl %ebp
-    subl $4, %esp
-    cmpl $0, %eax
-    jge endpid
-    negl %eax
-    movl %eax, errno
-    movl $-1, %eax
+	cmpl $0, %eax
+	jge endpid
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
 endpid:
-    movl %ebp, %esp
-    pop %ebp
-    ret
+	movl %ebp, %esp
+	popl %ebp
+	ret
 
 ENTRY(fork)
-    pushl %ebp
-    movl %esp, %ebp
-    movl $2, %eax
-    pushl $nextfork
-    pushl %ebp
-    movl %esp, %ebp
-    sysenter
+	pushl %ebp
+	movl %esp, %ebp
+	movl $2, %eax
+	pushl $nextfork
+	pushl %ebp
+	movl %esp, %ebp
+	sysenter
 nextfork:
-    popl %ebp
-    subl $4, %esp
-    cmpl $0, %eax
-    jge endfork
-    negl %eax
-    movl %eax, errno
-    movl $-1, %eax
+	popl %ebp
+	cmpl $0, %eax
+	jge endfork
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
 endfork:
-    movl %ebp, %esp
-    pop %ebp
-    ret
+	movl %ebp, %esp
+	popl %ebp
+	ret
 
+ENTRY(exit)
+	pushl %ebp
+	movl %esp, %ebp
+	movl $1, %eax
+	pushl $endexit
+	pushl %ebp
+	movl %esp, %ebp
+	sysenter
+endexit:
+	movl %ebp, %esp
+	popl %ebp
+	ret
 
+ENTRY(block)
+	pushl %ebp
+	movl %esp, %ebp
+	movl $5, %eax
+	pushl $nextblock
+	pushl %ebp
+	movl %esp, %ebp
+	sysenter
+nextblock:
+	popl %ebp
+	cmpl $0, %eax
+	jge endblock
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
+endblock:
+	movl %ebp, %esp
+	popl %ebp
+	ret
 
-
-
-
-
-
-
+ENTRY(unblock)
+	pushl %ebp
+	movl %esp, %ebp
+	movl $6, %eax
+	movl 8(%ebp), %edx
+	pushl $nextunblock
+	pushl %ebp
+	movl %esp, %ebp
+	sysenter
+nextunblock:
+	popl %ebp
+	cmpl $0, %eax
+	jge endunblock
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
+endunblock:
+	movl %ebp, %esp
+	popl %ebp
+	ret
+	
+	
+ENTRY(getchar)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx
+	movl 8(%ebp), %edx 
+	movl $3, %eax
+	pushl $return_getchar
+	pushl %ebp
+	movl %esp, %ebp
+	sysenter
+return_getchar:
+	popl %ebp
+	cmpl $0, %eax
+	jge end_getchar
+	negl %eax
+	movl %eax, errno
+	movl $-1, %eax
+end_getchar:
+	movl -4(%ebp), %ebx
+	movl %ebp, %esp
+	popl %ebp
+	ret

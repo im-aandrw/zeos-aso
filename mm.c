@@ -199,10 +199,10 @@ int alloc_frame( void )
 void free_user_pages( page_table_entry* process_PT )
 {
  int pag;
-    /* DATA */
+    /* DATA + STACK*/
  for (pag=0;pag<NUM_PAG_DATA;pag++){
-	 free_frame(process_PT[PAG_LOG_INIT_DATA+pag].bits.pbase_addr);
-         process_PT[PAG_LOG_INIT_DATA+pag].entry = 0;
+	 free_frame(process_PT[pag].bits.pbase_addr);
+         process_PT[pag].entry = 0;
  }
 }
 
@@ -235,4 +235,3 @@ void del_ss_pag(page_table_entry *PT, unsigned logical_page)
 unsigned int get_frame (page_table_entry *PT, unsigned int logical_page){
      return PT[logical_page].bits.pbase_addr; 
 }
-

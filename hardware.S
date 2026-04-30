@@ -7,12 +7,13 @@ ENTRY(get_eflags)
     ret
     
 // 
+
 ENTRY(writeMSR)
-    push %ebp
+    pushl %ebp
     movl %esp, %ebp
-    movl 8(%ebp), %ecx 
-    movl 12(%ebp), %eax 
-    movl 16(%ebp), %edx 
+    movl 8(%ebp), %ecx
+    movl 12(%ebp), %eax
+    xorl %edx, %edx
     wrmsr
     popl %ebp
     ret

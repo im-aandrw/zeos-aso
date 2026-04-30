@@ -104,12 +104,27 @@ ENTRY(keyboard_handler)
 
 
 ENTRY(clock_handler)
-	SAVE_ALL
-	EOI
-	call clock_routine
-	RESTORE_ALL
-	iret
+    SAVE_ALL
+    EOI
+    call clock_routine
+    cmpl $__USER_CS, 0x30(%esp)
+    jne clock_end
+    call schedule
+clock_end:
+    RESTORE_ALL
+    iret
+
 
 ENTRY(pf_handler)
-	call pf_routine
+    pushl 4(%esp)
+    pushl 4(%esp)
+    call pf_routine
+    addl $8, %esp
 
+
+ENTRY(ret_from_fork)
+	pushl %ebp
+	movl %esp, %ebp
+	movl $0, %eax
+	popl %ebp
+	ret

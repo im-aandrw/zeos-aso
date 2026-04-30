@@ -14,12 +14,13 @@
     ret
 
 
+
 .globl writeMSR; .type writeMSR, @function; .align 0; writeMSR:
-    push %ebp
+    pushl %ebp
     movl %esp, %ebp
     movl 8(%ebp), %ecx
     movl 12(%ebp), %eax
-    movl 16(%ebp), %edx
+    xorl %edx, %edx
     wrmsr
     popl %ebp
     ret
@@ -89,7 +90,7 @@
     pushl 20(%ebp)
     pushl 24(%ebp)
     lret
-# 107 "hardware.S"
+# 108 "hardware.S"
 .globl enable_int; .type enable_int, @function; .align 0; enable_int:
     pushl %ebp
     movl %esp, %ebp

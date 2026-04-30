@@ -8,11 +8,14 @@
 #include <io.h>
 #include <errno.h>
 #include <zeos_interrupt.h>
+#include <sched.h>
+#define CIRCULAR_BUFFER_CHARACTERS 128
 
 extern void keyboard_handler(void);
 extern void clock_handler(void);
 extern void pf_handler(void);
 extern unsigned int zeos_ticks;
+struct circular_buffer keyboard_buffer; 
 
 Gate idt[IDT_ENTRIES];
 Register    idtR;
@@ -20,11 +23,11 @@ Register    idtR;
 char char_map[] =
 {
   '\0','\0','1','2','3','4','5','6',
-  '7','8','9','0','\'','ก','\0','\0',
+  '7','8','9','0','\'','ยก','\0','\0',
   'q','w','e','r','t','y','u','i',
   'o','p','`','+','\0','\0','a','s',
-  'd','f','g','h','j','k','l','๑',
-  '\0','บ','\0','็','z','x','c','v',
+  'd','f','g','h','j','k','l','รฑ',
+  '\0','ยบ','\0','รง','z','x','c','v',
   'b','n','m',',','.','-','\0','*',
   '\0','\0','\0','\0','\0','\0','\0','\0',
   '\0','\0','\0','\0','\0','\0','\0','7',
@@ -107,31 +110,59 @@ void clock_routine()
    zeos_ticks += 1;
 }
 
+
+int add_circular_buffer(char c, struct circular_buffer *b)
+{
+    if (b == NULL) return -ENULLPTR;
+    if (b->count == CIRCULAR_BUFFER_CHARACTERS) return -ENOSPC;
+
+    b->data[b->tail] = c;
+    b->tail = (b->tail + 1) % CIRCULAR_BUFFER_CHARACTERS;  // en caso de que tail = 128 que vuelva al principio, 
+    // para evitar accesos fuera de rango en el buffer.
+    b->count++;
+    return 0;
+}
+
+int del_circular_buffer(char *c, struct circular_buffer *b)
+{
+    if (b == NULL) return -ENULLPTR;
+    if (b->count == 0) return -ENODATA;
+
+    *c = b->data[b->head];
+    b->head = (b->head + 1) % CIRCULAR_BUFFER_CHARACTERS; // en caso de que head = 128 que vuelva al principio,
+    // para evitar accesos fuera de rango en el buffer.
+    b->count--;
+    return 0;
+}
+
 void keyboard_routine()
 {
-  unsigned char key = inb(0x60);
-  // 1000 0000
-  if (key & 0x80)
+	unsigned char key = inb(0x60);
+	// 1000 0000
+	if (key & 0x80)
   {
     // 0111 1111 
     unsigned char newKey = key & 0x7f;
     char c = char_map[newKey];
     if (c == '\0')
     {
-    	printc_xy(0, 0, 'C');
+    	// printc_xy(0, 0, 'C');
+	add_circular_buffer('C', &keyboard_buffer);
     }
     else
     {
-    	printc_xy(0, 0, c);
+    	// printc_xy(0, 0, c);
+    	add_circular_buffer(c, &keyboard_buffer);
     }
   }
 }
 
+
 void pf_routine(unsigned long error, unsigned long eip)
 {
 	printk("\nProcess generates a PAGE FAULT exception at EIP: 0x");
-	char hex[] = "123456789ABCDEF";
-	for(int i = 7; i > 0; i--)
+	char hex[] = "0123456789ABCDEF";
+	for(int i = 7; i >= 0; i--)
 	{
 		unsigned long value = (eip >> (i * 4)) & 0xF; 
 		printc(hex[value]);
@@ -140,9 +171,6 @@ void pf_routine(unsigned long error, unsigned long eip)
 	printk(".\n");
 	while(1);
 }
-
-
-
 
 
 

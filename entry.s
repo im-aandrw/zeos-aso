@@ -48,11 +48,27 @@ sysenter_fin:
 
 
 .globl clock_handler; .type clock_handler, @function; .align 0; clock_handler:
- pushl %gs; pushl %fs; pushl %es; pushl %ds; pushl %eax; pushl %ebp; pushl %edi; pushl %esi; pushl %ebx; pushl %ecx; pushl %edx; movl $0x18, %edx; movl %edx, %ds; movl %edx, %es
- movb $0x20, %al ; outb %al, $0x20 ;
- call clock_routine
- popl %edx; popl %ecx; popl %ebx; popl %esi; popl %edi; popl %ebp; popl %eax; popl %ds; popl %es; popl %fs; popl %gs
- iret
+    pushl %gs; pushl %fs; pushl %es; pushl %ds; pushl %eax; pushl %ebp; pushl %edi; pushl %esi; pushl %ebx; pushl %ecx; pushl %edx; movl $0x18, %edx; movl %edx, %ds; movl %edx, %es
+    movb $0x20, %al ; outb %al, $0x20 ;
+    call clock_routine
+    cmpl $0x23, 0x30(%esp)
+    jne clock_end
+    call schedule
+clock_end:
+    popl %edx; popl %ecx; popl %ebx; popl %esi; popl %edi; popl %ebp; popl %eax; popl %ds; popl %es; popl %fs; popl %gs
+    iret
+
 
 .globl pf_handler; .type pf_handler, @function; .align 0; pf_handler:
- call pf_routine
+    pushl 4(%esp)
+    pushl 4(%esp)
+    call pf_routine
+    addl $8, %esp
+
+
+.globl ret_from_fork; .type ret_from_fork, @function; .align 0; ret_from_fork:
+ pushl %ebp
+ movl %esp, %ebp
+ movl $0, %eax
+ popl %ebp
+ ret
